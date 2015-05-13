@@ -1,0 +1,114 @@
+#include "d3m.hsp"
+//#include "hgimg3.as"
+#include "gdi32.as"
+#define make 50
+
+title "debugdoll"
+
+//パーティクル
+ddim pclex,make
+ddim pcley,make
+ddim pclez,make
+ddim pcleang,make
+ddim pcler,make
+r = 30
+mes "g:game"
+
+//カレンダー
+	pos ginfo_sx-230,ginfo_sy-150
+	winobj "sysmonthcal32", "", , $50000000 | $10, 230, 150
+	hMonthcal = objinfo(stat, 2)
+
+;	SYSTEMTIME構造体の領域確保
+;	年/月/曜日/日/時/分/秒/ミリ秒 が2バイトづつ
+	dim SYSTEMTIME, 4
+
+
+//テクスチャ
+//texload2 "8.png"
+//texid = stat
+buffer 2,400,400,0
+picload "sintyoku.png",1
+gsel 0
+
+	repeat make
+//		パーティクル初期化
+		d3mkparticle cnt,  255, 255, 32
+		; 座標準備
+		pcler(cnt) = rnd(100)
+		pcleang(cnt) = absf((rnd(628))/100)
+		pclex(cnt) = cos(pcleang(cnt))*pcler(cnt)
+		pcley(cnt) = cos(pcleang(cnt))*pcler(cnt)
+		pclez(cnt) = cos(pcleang(cnt))*pcler(cnt)
+
+//		パーティクルを描画
+		d3particle cnt,  pclex(cnt), pcley(cnt), pclez(cnt),  r	
+	loop
+	
+*mainloop
+	ct++
+	redraw 0
+	color 24, 24, 24
+	boxf
+	//カメラ位置
+	d3setcam cos(0.04 * ct) * 1000, sin(0.04 * ct) * 1000, cos(0.03 * ct) * 400
+//	d3setcam 1000,800,500
+
+//	枠のボックス
+	color 64, 64, 64
+	d3box -200, -200, -200,  200, 200, 200
+
+
+//	パーティクル描画時のコピーモードを設定
+	gmode 5, , , 128
+
+//	パーティクルを描画
+	redraw 0
+	repeat make
+		; 座標準備
+		pcleang(cnt) += 0.1
+		pclex(cnt) = cos(pcleang(cnt))*pcler(cnt)
+		pcley(cnt) = sin(pcleang(cnt))*pcler(cnt)
+		if cnt\2 == 0:pclez(cnt) = sin(pcleang(cnt))*pcler(cnt)
+		if cnt\2 == 1:pclez(cnt) = cos(pcleang(cnt))*pcler(cnt)
+		d3particle cnt,  pclex(cnt), pcley(cnt), pclez(cnt),  r
+	loop
+	
+	
+	tr = 200
+	x = -tr, tr, tr, -tr
+	y = -tr, -tr, -tr, -tr
+	z = tr, tr,-tr,-tr
+	d3texture x,y,z,2,0,0,400,400
+	x = tr, -tr, -tr, tr
+	y = tr, tr, tr, tr
+	d3texture x,y,z,2,0,0,400,400
+	x = tr, tr, tr, tr
+	y = -tr, tr, tr, -tr
+	z = tr, tr, -tr, -tr
+	d3texture x,y,z,2,0,0,400,400
+	x = -tr, -tr, -tr, -tr
+	y = tr, -tr, -tr, tr
+	d3texture x,y,z,2,0,0,400,400
+	x = -tr, tr, tr, -tr
+	y = tr, tr, -tr, -tr
+	z = tr, tr, tr, tr
+	d3texture x,y,z,2,0,0,400,400
+	x = tr, -tr, -tr, tr
+	z = -tr, -tr, -tr, -tr
+	d3texture x,y,z,2,0,0,400,400
+	redraw 1
+	
+	getkey buf,71
+	if buf == 1 : gosub *exegame
+	
+	await 30
+
+	goto *mainloop
+	
+*exegame
+	dir = dir_cur + "\\typing.hsp"
+	opt = dir_exe + "\\chspcomp.exe " + dir
+	dialog opt
+	exec opt
+		
