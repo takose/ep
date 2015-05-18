@@ -28,7 +28,7 @@ mes "g:game"
 //texload2 "8.png"
 //texid = stat
 buffer 2,400,400,0
-picload "sintyoku.png",1
+picload "sintyoku.jpg",1
 gsel 0
 
 	repeat make
